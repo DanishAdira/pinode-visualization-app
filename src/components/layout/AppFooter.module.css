@@ -1,0 +1,17 @@
+.footerContainer {
+    background: linear-gradient(135deg, #86e3ce 0%, #a8e6cf 100%);
+    color     : #ffffff;
+    padding   : 2rem;
+    text-align: center;
+    box-shadow: 0 -4px 12px rgba(0, 77, 64, 0.06);
+    margin-top: auto;
+    position  : relative;
+    z-index   : 5;
+}
+
+.footerText {
+    margin     : 0;
+    font-size  : 0.875rem;
+    line-height: 1.6;
+    opacity    : 0.85;
+}
