@@ -1,14 +1,13 @@
 // src/graphql/queries.ts
 
 export const listSensorData = /* GraphQL */ `
-  query ListSensorData(
-    $filter: ModelSensorDataFilterInput
+query ListSensorData(
     $limit: Int
     $nextToken: String
   ) {
-    listSensorData(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    listSensorData(limit: $limit, nextToken: $nextToken) {
       items {
-        deviceId
+        deviceID
         timestamp
         payload {
           data {

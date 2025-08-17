@@ -8,14 +8,20 @@ import styles from './AnalysisResultsPage.module.css'; // melon-appからコピ�
 
 const client = generateClient();
 
-// センサーデータの型定義
+// センサーデータの型定義 (★全てのキーを追加)
 interface SensorData {
     deviceId: string;
     timestamp: string;
     payload: {
         data: {
-            temperature: number;
+            fruit_diagram: number;
             humidity: number;
+            humidity_hq: number;
+            i_v_light: number;
+            stem: number;
+            temperature: number;
+            temperature_hq: number;
+            u_v_light: number;
         };
     };
 }
@@ -39,19 +45,22 @@ const SensorDataPage = () => {
             try {
                 setLoading(true);
                 
-                // ★ 修正点：client.graphqlの結果を明示的に型付けする
                 const result = await client.graphql({ 
                     query: listSensorData,
                 }) as ListSensorDataQueryResult;
                 
-                const data = result.data.listSensorData.items;
+                // データが存在しない、またはitemsがnullの場合を考慮
+                const data = result.data?.listSensorData?.items || [];
                 
                 // タイムスタンプでソート（昇順）
-                data.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+                // JSONでやり取りされる過程でtimestampが文字列になることを想定
+                data.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
 
                 setSensorData(data);
-            } catch (err) {
-                setError('データの取得に失敗しました。');
+            } catch (err: any) {
+                // ★エラー内容を具体的に表示するよう変更
+                const errorMessage = err.errors ? err.errors[0].message : '詳細不明なエラーが発生しました。';
+                setError(`データの取得に失敗しました: ${errorMessage}`);
                 console.error('Error fetching sensor data:', err);
             } finally {
                 setLoading(false);
@@ -70,7 +79,7 @@ const SensorDataPage = () => {
     }
 
     const chartData = sensorData.map(item => ({
-        name: new Date(item.timestamp).toLocaleTimeString('ja-JP'),
+        name: new Date(parseInt(item.timestamp, 10)).toLocaleTimeString('ja-JP'),
         temperature: item.payload?.data?.temperature,
         humidity: item.payload?.data?.humidity,
     }));
@@ -82,11 +91,15 @@ const SensorDataPage = () => {
             <div className={styles.resultGrid}>
                 <div className={styles.resultCard}>
                     <h3>最新の温度</h3>
-                    <p className={styles.resultCardValue}>{sensorData.length > 0 ? sensorData[sensorData.length - 1].payload.data.temperature.toFixed(2) : '---'} °C</p>
+                    <p className={styles.resultCardValue}>
+                        {sensorData.length > 0 ? sensorData[sensorData.length - 1].payload.data.temperature.toFixed(2) : '---'} °C
+                    </p>
                 </div>
                 <div className={styles.resultCard}>
                     <h3>最新の湿度</h3>
-                    <p className={styles.resultCardValue}>{sensorData.length > 0 ? sensorData[sensorData.length - 1].payload.data.humidity.toFixed(2) : '---'} %</p>
+                    <p className={styles.resultCardValue}>
+                        {sensorData.length > 0 ? sensorData[sensorData.length - 1].payload.data.humidity.toFixed(2) : '---'} %
+                    </p>
                 </div>
             </div>
 
