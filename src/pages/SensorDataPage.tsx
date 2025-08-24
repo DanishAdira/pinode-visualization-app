@@ -1,6 +1,7 @@
 // src/pages/SensorDataPage.tsx (時間指定対応版)
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
+import { getUrl } from 'aws-amplify/storage';
 import { listSensorData } from '../graphql/queries';
 import { createCsvExport } from '../graphql/mutations';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -11,18 +12,15 @@ const client = generateClient();
 interface SensorData {
     deviceID: string;
     timestamp: string;
-    payload: {
-        data: {
-            fruit_diagram: number;
-            humidity: number;
-            humidity_hq: number;
-            i_v_light: number;
-            stem: number;
-            temperature: number;
-            temperature_hq: number;
-            u_v_light: number;
-        };
-    };
+    imageKeys?: string[] | null;
+    fruit_diagram: number;
+    humidity: number;
+    humidity_hq: number;
+    i_v_light: number;
+    stem: number;
+    temperature: number;
+    temperature_hq: number;
+    u_v_light: number;
 }
 
 type ListSensorDataQueryResult = {
@@ -45,6 +43,9 @@ const SensorDataPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
+    const [imageUrls, setImageUrls] = useState<string[]>([]);
+    const [imageLoading, setImageLoading] = useState<boolean>(false);
+
     const [exporting, setExporting] = useState<boolean>(false);
     const [exportError, setExportError] = useState<string | null>(null);
     const [exportDeviceId, setExportDeviceId] = useState<string>('00');
@@ -64,6 +65,28 @@ const SensorDataPage = () => {
             validItems.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
 
             setSensorData(validItems);
+
+            // ★ 追加: 最新データの画像キーを取得してURLを生成
+            const latestItem = validItems.length > 0 ? validItems[validItems.length - 1] : null;
+            if (latestItem && latestItem.imageKeys && latestItem.imageKeys.length > 0) {
+                setImageLoading(true);
+                const urls = await Promise.all(
+                    latestItem.imageKeys.map(async (key) => {
+                        try {
+                            const getUrlResult = await getUrl({ key });
+                            return getUrlResult.url.toString();
+                        } catch (e) {
+                            console.error('Error getting image URL', e);
+                            return ''; // エラー時は空文字
+                        }
+                    })
+                );
+                setImageUrls(urls.filter(url => url)); // 空文字を除外
+                setImageLoading(false);
+            } else {
+                setImageUrls([]); // 画像キーがない場合はクリア
+            }
+
             setError(null);
         } catch (err: any) {
             const errorMessage = err.errors ? err.errors.map((e: any) => e.message).join(', ') : '詳細不明なエラーが発生しました。';
@@ -132,18 +155,18 @@ const SensorDataPage = () => {
     if (error) return <div className={styles.pageContainer}><h1>エラー</h1><p>{error}</p></div>;
     
     const tempHumidityChartData = sensorData.map(item => ({
-        name: new Date(parseInt(item.timestamp, 10)).toLocaleTimeString('ja-JP'),
-        temperature: item.payload?.data?.temperature,
-        humidity: item.payload?.data?.humidity,
+        name: new Date(parseInt(item.timestamp, 10) * 1000).toLocaleTimeString('ja-JP'),
+        temperature: item.temperature,
+        humidity: item.humidity,
     }));
 
     const lightChartData = sensorData.map(item => ({
-        name: new Date(parseInt(item.timestamp, 10)).toLocaleTimeString('ja-JP'),
-        u_v_light: item.payload?.data?.u_v_light,
-        i_v_light: item.payload?.data?.i_v_light,
+        name: new Date(parseInt(item.timestamp, 10) * 1000).toLocaleTimeString('ja-JP'),
+        u_v_light: item.u_v_light,
+        i_v_light: item.i_v_light,
     }));
     
-    const latestData = sensorData.length > 0 ? sensorData[sensorData.length - 1].payload.data : null;
+    const latestData = sensorData.length > 0 ? sensorData[sensorData.length - 1] : null;
 
     return (
         <div className={styles.pageContainer}>
@@ -233,6 +256,19 @@ const SensorDataPage = () => {
                         {exporting ? 'エクスポート中...' : 'CSVダウンロード'}
                     </button>
                 </div>
+                <div className={styles.imageSection} style={{ marginBottom: '2rem' }}>
+                    <h3>最新の撮影画像</h3>
+                    {imageLoading && <p>画像を読み込んでいます...</p>}
+                    {!imageLoading && imageUrls.length === 0 && <p>表示できる画像がありません。</p>}
+                    <div className={styles.imageGrid}>
+                        {imageUrls.map((url, index) => (
+                            <div key={index} className={styles.imageContainer}>
+                                <img src={url} alt={`Sensor image ${index + 1}`} style={{ width: '100%', borderRadius: '8px' }} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {exportError && <p style={{ color: 'red', marginTop: '0.5rem' }}>{exportError}</p>}
             </div>
 

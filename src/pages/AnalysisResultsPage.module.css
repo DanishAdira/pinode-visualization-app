@@ -93,3 +93,15 @@
     text-align: center;
     margin-top: 2.5rem;
 }
+
+/* src/pages/AnalysisResultsPage.module.css の末尾に追加 */
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.imageContainer {
+  width: 100%;
+}
