@@ -4,37 +4,49 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.css';
-
 import { Amplify } from 'aws-amplify';
 
-// 環境変数からAmplify設定オブジェクトを構築
-const amplifyConfig = {
-    "aws_project_region": process.env.REACT_APP_AWS_PROJECT_REGION,
-    "aws_appsync_graphqlEndpoint": process.env.REACT_APP_APPSYNC_GRAPHQLENDPOINT,
-    "aws_appsync_region": process.env.REACT_APP_AWS_PROJECT_REGION,
-    "aws_appsync_authenticationType": "API_KEY",
-    "aws_appsync_apiKey": process.env.REACT_APP_APPSYNC_APIKEY,
-    "Auth": {
-        "identityPoolId": process.env.RえEACT_APP_COGNITO_IDENTITY_POOL_ID,
-        "region"        : process.env.REACT_APP_AWS_PROJECT_REGION
-    },
-    "Storage": {
-        "AWSS3": {
-            "bucket": process.env.REACT_APP_S3_BUCKET, // S3バケット名を環境変数から取得
-            "region": process.env.REACT_APP_AWS_PROJECT_REGION // AppSyncと同じリージョン
-        }
-    }
-};
+const requiredEnvVars = [
+	'REACT_APP_AWS_PROJECT_REGION',
+	'REACT_APP_COGNITO_IDENTITY_POOL_ID',
+	'REACT_APP_S3_BUCKET',
+	'REACT_APP_APPSYNC_GRAPHQLENDPOINT',
+	'REACT_APP_APPSYNC_APIKEY',
+];
+for (const k of requiredEnvVars) {
+	if (!process.env[k]) {
+		throw new Error(`[Amplify Config Error] "${k}" is not set. Check your .env.development`);
+	}
+}
 
-Amplify.configure(amplifyConfig);
+Amplify.configure({
+	Auth: {
+		Cognito: {
+			identityPoolId: process.env.REACT_APP_COGNITO_IDENTITY_POOL_ID!,
+			allowGuestAccess: true,
+		},
+	},
+	Storage: {
+		S3: {
+			bucket: process.env.REACT_APP_S3_BUCKET!,
+			region: process.env.REACT_APP_AWS_PROJECT_REGION!,
+		},
+	},
+	API: {
+		GraphQL: {
+			endpoint: process.env.REACT_APP_APPSYNC_GRAPHQLENDPOINT!,
+			region: process.env.REACT_APP_AWS_PROJECT_REGION!,
+			apiKey: process.env.REACT_APP_APPSYNC_APIKEY!,
+			defaultAuthMode: 'apiKey' as const,
+		},
+	},
+});
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>
 );
 
 reportWebVitals();
