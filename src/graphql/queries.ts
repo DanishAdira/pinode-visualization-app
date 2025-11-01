@@ -2,10 +2,11 @@
 
 export const listSensorData = /* GraphQL */ `
 query ListSensorData(
+    $deviceID: String!,
     $limit: Int
     $nextToken: String
   ) {
-    listSensorData(limit: $limit, nextToken: $nextToken) {
+    listSensorData(deviceID: $deviceID, limit: $limit, nextToken: $nextToken) {
       items {
         deviceID
         timestamp

@@ -43,7 +43,9 @@ const SensorDataPage: React.FC = () => {
 
 	const [exporting, setExporting] = useState(false);
 	const [exportError, setExportError] = useState<string | null>(null);
-	const [exportDeviceId, setExportDeviceId] = useState('00');
+	const [exportDeviceId, setExportDeviceId] = useState('22-27');
+	const [selectedDeviceId, setSelectedDeviceId] = useState('22-27');
+	const availableDevices = ['22-27','22-30'];
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
 
@@ -80,7 +82,10 @@ const SensorDataPage: React.FC = () => {
 	const fetchData = useCallback(async (isRefreshing = false) => {
 		if (!isRefreshing) setLoading(true);
 		try {
-			const result = (await client.graphql({ query: listSensorData })) as ListSensorDataQueryResult;
+			const result = (await client.graphql({ 
+				query: listSensorData,
+				variables: { deviceID: selectedDeviceId }				
+			 })) as ListSensorDataQueryResult;
 			const items = result.data?.listSensorData?.items ?? [];
 			const valid = items.filter((x): x is SensorData => x != null);
 			valid.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
@@ -102,13 +107,16 @@ const SensorDataPage: React.FC = () => {
 			setImageLoading(false);
 			if (!isRefreshing) setLoading(false);
 		}
-	}, []);
+	}, [selectedDeviceId]);
 
+	// useEffect(() => {
+	// 	fetchData();
+	// 	const id = setInterval(() => fetchData(true), 30000);
+	// 	return () => clearInterval(id);
+	// }, [fetchData]);
 	useEffect(() => {
-		fetchData();
-		const id = setInterval(() => fetchData(true), 30000);
-		return () => clearInterval(id);
-	}, [fetchData]);
+		setExportDeviceId(selectedDeviceId);
+	}, [selectedDeviceId]);	
 
 	const handleExport = async () => {
 		if (!startDate || !endDate || !exportDeviceId) {
@@ -166,6 +174,15 @@ const SensorDataPage: React.FC = () => {
 	return (
 		<div className={styles.pageContainer}>
 			<h1>センサーデータ可視化</h1>
+
+			<div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+    	        <strong>表示デバイス: </strong>
+        	    <select value={selectedDeviceId} onChange={(e) => setSelectedDeviceId(e.target.value)} style={{ padding: '8px', fontSize: '1rem' }}>
+            	    {availableDevices.map(id => (
+                	    <option key={id} value={id}>{id}</option>
+                	))}
+        	    </select>
+        	</div>
 
 			<div className={styles.resultGrid}>
 				<div className={styles.resultCard}><h3>現在の温度</h3><p className={styles.resultCardValue}>{latest?.temperature?.toFixed(2) ?? '---'} °C</p></div>
