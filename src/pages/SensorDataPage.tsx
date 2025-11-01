@@ -45,7 +45,7 @@ const SensorDataPage: React.FC = () => {
 	const [exportError, setExportError] = useState<string | null>(null);
 	const [exportDeviceId, setExportDeviceId] = useState('22-27');
 	const [selectedDeviceId, setSelectedDeviceId] = useState('22-27');
-	const availableDevices = ['22-27','22-30'];
+	const availableDevices = ['22-27','22-28','22-30','24-23','24-24','24-29'];
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
 
