@@ -114,9 +114,24 @@ const SensorDataPage: React.FC = () => {
 	// 	const id = setInterval(() => fetchData(true), 30000);
 	// 	return () => clearInterval(id);
 	// }, [fetchData]);
+	// useEffect(() => {
+	// 	setExportDeviceId(selectedDeviceId);
+	// }, [selectedDeviceId]);	
+
 	useEffect(() => {
-		setExportDeviceId(selectedDeviceId);
-	}, [selectedDeviceId]);	
+        // 1. データをフェッチする
+        fetchData();
+
+        // 2. CSVエクスポートのIDを選択中のIDと同期する
+        setExportDeviceId(selectedDeviceId);
+
+        // 3. 30秒ごとの自動更新タイマーをセットする
+        const id = setInterval(() => fetchData(true), 30000);
+
+        // 4. コンポーネントがアンマウントされる時にタイマーを解除する
+        return () => clearInterval(id);
+
+    }, [fetchData, selectedDeviceId]);
 
 	const handleExport = async () => {
 		if (!startDate || !endDate || !exportDeviceId) {
@@ -175,14 +190,25 @@ const SensorDataPage: React.FC = () => {
 		<div className={styles.pageContainer}>
 			<h1>センサーデータ可視化</h1>
 
-			<div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+			{/* <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
     	        <strong>表示デバイス: </strong>
         	    <select value={selectedDeviceId} onChange={(e) => setSelectedDeviceId(e.target.value)} style={{ padding: '8px', fontSize: '1rem' }}>
             	    {availableDevices.map(id => (
                 	    <option key={id} value={id}>{id}</option>
                 	))}
         	    </select>
-        	</div>
+        	</div> */}
+
+			<div className={styles.selectorContainer}>
+				<label htmlFor="device-select" className={styles.selectorLabel}>
+					表示デバイス:
+				</label>
+				<select id="device-select" value={selectedDeviceId} onChange={(e) => setSelectedDeviceId(e.target.value)} className={styles.deviceSelector} >
+					{availableDevices.map(id => (
+					<option key={id} value={id}>{id}</option>
+					))}
+				</select>
+			</div>
 
 			<div className={styles.resultGrid}>
 				<div className={styles.resultCard}><h3>現在の温度</h3><p className={styles.resultCardValue}>{latest?.temperature?.toFixed(2) ?? '---'} °C</p></div>
