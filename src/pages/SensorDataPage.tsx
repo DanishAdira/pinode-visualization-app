@@ -1,7 +1,7 @@
 // src/pages/SensorDataPage.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
-import { listSensorData } from '../graphql/queries';
+import { listSensorDataByDevice } from '../graphql/queries';
 import { createCsvExport } from '../graphql/mutations';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from './AnalysisResultsPage.module.css';
@@ -26,7 +26,7 @@ type SensorData = {
 };
 
 type ListSensorDataQueryResult = {
-	data?: { listSensorData: { items: (SensorData | null)[] } };
+	data?: { listSensorDataByDevice: { items: (SensorData | null)[] } };
 };
 
 type CreateCsvExportResult = {
@@ -43,9 +43,9 @@ const SensorDataPage: React.FC = () => {
 
 	const [exporting, setExporting] = useState(false);
 	const [exportError, setExportError] = useState<string | null>(null);
-	const [exportDeviceId, setExportDeviceId] = useState('22-27');
-	const [selectedDeviceId, setSelectedDeviceId] = useState('22-27');
-	const availableDevices = ['22-27','22-28','22-30','24-23','24-24','24-29'];
+	const [exportDeviceId, setExportDeviceId] = useState('PiNode40');
+	const [selectedDeviceId, setSelectedDeviceId] = useState('PiNode40');
+	const availableDevices = ['PiNode40','PiNode41','PiNode42','PiNode43','PiNode44','pinode45','pinode46','pinode47','pinode48','pinode49'];
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
 
@@ -83,12 +83,17 @@ const SensorDataPage: React.FC = () => {
 		if (!isRefreshing) setLoading(true);
 		try {
 			const result = (await client.graphql({ 
-				query: listSensorData,
+				query: listSensorDataByDevice,
 				variables: { deviceID: selectedDeviceId }				
-			 })) as ListSensorDataQueryResult;
-			const items = result.data?.listSensorData?.items ?? [];
+			})) as ListSensorDataQueryResult;
+
+			console.log('GraphQL response:', result);
+			console.log('errors:', (result as any).errors);
+
+			const items = result.data?.listSensorDataByDevice?.items ?? [];
 			const valid = items.filter((x): x is SensorData => x != null);
-			valid.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
+			// valid.sort((a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10));
+			valid.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 			setSensorData(valid);
 
 			const latest = valid.at(-1);
@@ -108,15 +113,6 @@ const SensorDataPage: React.FC = () => {
 			if (!isRefreshing) setLoading(false);
 		}
 	}, [selectedDeviceId]);
-
-	// useEffect(() => {
-	// 	fetchData();
-	// 	const id = setInterval(() => fetchData(true), 30000);
-	// 	return () => clearInterval(id);
-	// }, [fetchData]);
-	// useEffect(() => {
-	// 	setExportDeviceId(selectedDeviceId);
-	// }, [selectedDeviceId]);	
 
 	useEffect(() => {
         // 1. データをフェッチする
@@ -141,8 +137,10 @@ const SensorDataPage: React.FC = () => {
 		setExporting(true);
 		setExportError(null);
 		try {
-			const startTimestamp = new Date(startDate).getTime().toString();
-			const endTimestamp = new Date(endDate).getTime().toString();
+			// const startTimestamp = new Date(startDate).getTime().toString();
+			// const endTimestamp = new Date(endDate).getTime().toString();
+			const startTimestamp = new Date(startDate).toISOString();
+			const endTimestamp = new Date(endDate).toISOString();
 			const result = (await client.graphql({
 				query: createCsvExport,
 				variables: { deviceID: exportDeviceId, startTimestamp, endTimestamp },
@@ -175,12 +173,14 @@ const SensorDataPage: React.FC = () => {
 	if (error) return <div className={styles.pageContainer}><h1>エラー</h1><p>{error}</p></div>;
 
 	const tempHumidityChartData = sensorData.map((item) => ({
-		name: new Date(parseInt(item.timestamp, 10) * 1000).toLocaleTimeString('ja-JP'),
+		// name: new Date(parseInt(item.timestamp, 10) * 1000).toLocaleTimeString('ja-JP'),
+		name: new Date(item.timestamp).toLocaleString('ja-JP'),
 		temperature: item.temperature,
 		humidity: item.humidity,
 	}));
 	const lightChartData = sensorData.map((item) => ({
-		name: new Date(parseInt(item.timestamp, 10) * 1000).toLocaleTimeString('ja-JP'),
+		// name: new Date(parseInt(item.timestamp, 10) * 1000).toLocaleTimeString('ja-JP'),
+		name: new Date(item.timestamp).toLocaleString('ja-JP'),
 		u_v_light: item.u_v_light,
 		i_v_light: item.i_v_light,
 	}));

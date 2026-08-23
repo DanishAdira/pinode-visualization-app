@@ -1,24 +1,11 @@
-// src/graphql/queries.ts (修正後)
-
-export const listSensorData = /* GraphQL */ `
-query ListSensorData(
-    $deviceID: String!,
-    $limit: Int
-    $nextToken: String
-  ) {
-    listSensorData(deviceID: $deviceID, limit: $limit, nextToken: $nextToken) {
+export const listSensorDataByDevice = /* GraphQL */ `
+  query ListSensorDataByDevice($deviceID: String!, $limit: Int, $nextToken: String) {
+    listSensorDataByDevice(deviceID: $deviceID, limit: $limit, nextToken: $nextToken) {
       items {
-        deviceID
-        timestamp
+        deviceID fieldID plantID sectionID plantNumber
+        timestamp timestampLocal
         imageKeys
-        fruit_diagram
-        humidity
-        humidity_hq
-        i_v_light
-        stem
-        temperature
-        temperature_hq
-        u_v_light
+        temperature humidity i_v_light u_v_light
       }
       nextToken
     }
