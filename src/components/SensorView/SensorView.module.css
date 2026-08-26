@@ -1,0 +1,114 @@
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.6rem 0.8rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.headerRow {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.smallInput { padding: 0.3rem 0.4rem; font-size: 0.85rem; }
+.smallBtn   { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+.headerRight {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.2;
+}
+.headerTime  { font-size: 1.1rem; font-weight: 700; }
+.headerDate  { font-size: 0.7rem; color: #888; }
+.headerDeviceTag {
+    font-size: 0.7rem;
+    color: #666;
+    margin-right: auto;
+    padding: 0.15rem 0.4rem;
+    background: #f0f4fb;
+    border-radius: 4px;
+}
+
+.section       { padding: 0.8rem 0.8rem 0.4rem; }
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.4rem;
+}
+.sectionTitle { margin: 0; font-size: 0.95rem; }
+.sectionMeta  { font-size: 0.8rem; color: #666; }
+.mutedText    { color: #888; font-size: 0.85rem; }
+
+.imageGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.6rem;
+}
+.image { width: 100%; border-radius: 8px; display: block; }
+
+.metricTabs {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding: 0.5rem 0.8rem;
+    -webkit-overflow-scrolling: touch;
+}
+.metricTab {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    color: #333;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.chartBlock  { padding: 0 0.8rem; }
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.3rem;
+}
+.chartLabel { font-size: 0.85rem; color: #666; }
+.chartUnit  { color: #aaa; }
+.chartRange { font-size: 0.75rem; color: #888; }
+.detailChart   { height: 260px; }
+.overviewBlock { padding: 0.8rem; }
+.overviewNote  { font-size: 0.75rem; color: #888; margin-bottom: 0.25rem; }
+.overviewChart {
+    height: 90px;
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 0.3rem;
+}
+.sliderRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #999;
+}
+.slider { width: 100%; margin-top: 0.3rem; }
+
+.csvBlock {
+    padding: 1rem 0.8rem 2rem;
+    border-top: 1px solid #eee;
+    margin-top: 0.5rem;
+}
+.csvTitle { margin: 0 0 0.6rem; font-size: 0.9rem; color: #666; }
+.csvForm  { display: flex; flex-direction: column; gap: 0.4rem; }
+.csvRow   { display: flex; gap: 0.4rem; align-items: center; }
+.csvInput { padding: 0.4rem; flex: 1; }
+.csvBtn   { padding: 0.5rem; font-size: 0.9rem; }
+.csvError { color: red; margin-top: 0.4rem; font-size: 0.85rem; }
+
+.centerPad { padding: 3rem; text-align: center; color: #888; }
+.errorPad  { padding: 2rem; text-align: center; }

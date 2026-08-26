@@ -30,3 +30,17 @@ export const listSensorDataByDevice = /* GraphQL */ `
     }
   }
 `;
+
+export const listDevices = /* GraphQL */ `
+  query ListDevices($fieldID: String!) {
+    listDevices(fieldID: $fieldID) {
+      deviceID
+      fieldID
+      sectionID
+      plantID
+      plantNumber
+      deviceType
+      wiltDeviceId
+    }
+  }
+`;
